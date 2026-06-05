@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>모두레이터 — 필요한 솔루션을 대화로 찾으세요</title>
+<meta name="description" content="모두레이터가 대화로 내게 맞는 AI 솔루션을 찾아주는 창업자 전용 큐레이터" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="bg-fx"></div>
+<div class="bg-grid"></div>
+
+<!-- ===== 상단 네비 ===== -->
+<header class="topbar">
+  <div class="logo" data-go="home">
+    <div class="logo-mark">M</div>
+    <b>모두레이터</b>
+  </div>
+  <nav class="nav-links">
+    <button class="nav-link active" data-go="home">홈</button>
+    <button class="nav-link" data-go="chat">솔루션 찾기</button>
+    <button class="nav-link" data-go="browse">솔루션 탐색</button>
+  </nav>
+  <button class="login-btn">로그인</button>
+</header>
+
+<!-- ===== 뷰: 홈 ===== -->
+<section class="view active" id="view-home">
+  <div class="hero">
+    <div class="mascot"><span class="eye l"></span><span class="eye r"></span></div>
+    <h1>필요한 솔루션을<br /><em>대화</em>로 찾으세요.</h1>
+    <p class="hero-sub">
+      <b>모두레이터</b>가 더 잘 맞는 파트너를 추천하고 이유를 설명하며,
+      <b id="solCount">407</b>개 검증된 AI 솔루션 중 당신에게 맞는 것을 골라드려요.
+    </p>
+    <form class="searchbar" id="heroForm" autocomplete="off">
+      <input id="heroInput" placeholder="예) ERP 도입, 마케팅 자동화, 보안 솔루션 찾기" />
+      <button class="go" type="submit" aria-label="검색">↑</button>
+    </form>
+    <div class="suggest">
+      <button>사업계획서 쓰는 게 막막해요</button>
+      <button>세금·회계 자동화하고 싶어요</button>
+      <button>코딩 없이 홈페이지 만들기</button>
+      <button>고객 문의를 챗봇으로 받고 싶어요</button>
+    </div>
+    <div class="hero-foot"><span>검증된 파트너</span>·<span>맞춤 추천</span>·<span>빠른 연결</span></div>
+  </div>
+
+  <div class="trust">
+    <div class="trust-item"><div class="trust-num" id="tSol">407</div><div class="trust-label">등록 AI 솔루션</div></div>
+    <div class="trust-item"><div class="trust-num" id="tOrg">283</div><div class="trust-label">공급 기업</div></div>
+    <div class="trust-item"><div class="trust-num">220</div><div class="trust-label">홈페이지 검증 완료</div></div>
+    <div class="trust-item"><div class="trust-num">100<span class="unit">만원</span></div><div class="trust-label">월 사용료 지원</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <h2>분야별로 둘러보기</h2>
+      <button class="more" data-go="browse">전체 탐색 →</button>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+
+  <div class="section" style="padding-top:0">
+    <div class="section-head"><h2>지금 인기 있는 솔루션</h2></div>
+    <div class="browse-grid" id="popularGrid" style="padding:0"></div>
+  </div>
+</section>
+
+<!-- ===== 뷰: 대화 ===== -->
+<section class="view" id="view-chat">
+  <div class="chat-wrap">
+    <div class="chat-side">
+      <div class="chat-bar">
+        <div class="title"><span class="bot-dot">🤖</span>모두레이터<span class="sub">AI 어시스턴트</span></div>
+        <button class="ghost-btn" id="resetBtn">새 대화</button>
+      </div>
+      <div class="thread" id="thread"></div>
+      <form class="composer" id="composer" autocomplete="off">
+        <input id="chatInput" placeholder="메시지를 입력하세요…" />
+        <button type="submit" aria-label="보내기">↑</button>
+      </form>
+    </div>
+    <aside class="rec-side">
+      <div class="rec-head">
+        <span class="t">모두레이터의 추천</span>
+        <span class="h" id="recHint">대화에 따라 솔루션이 나타나요</span>
+      </div>
+      <div class="rec-list" id="recList">
+        <div class="rec-empty">왼쪽에 고민을 입력하면<br />여기에 맞춤 솔루션이 표시됩니다.</div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ===== 뷰: 탐색 ===== -->
+<section class="view" id="view-browse">
+  <div class="browse-head">
+    <h2>AI 솔루션 탐색</h2>
+    <p>분야별로 검증된 솔루션을 둘러보세요.</p>
+  </div>
+  <div class="filters" id="filters">
+    <button class="filter-chip active" data-cat="">전체</button>
+    <div class="sort-sel">
+      <select id="sortSel">
+        <option value="like">인기순</option>
+        <option value="verified">검증 점수순</option>
+        <option value="name">이름순</option>
+      </select>
+    </div>
+  </div>
+  <div class="browse-grid" id="browseGrid"></div>
+</section>
+
+<footer>모두레이터는 모두의창업 공개 데이터 기반 실험 서비스입니다 · 추천은 등록 정보와 홈페이지 검증을 종합합니다</footer>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+<script src="app.js"></script>
+</body>
+</html>
