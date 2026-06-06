@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>솔루션 데이터맵 — 모두레이터</title>
+<meta name="description" content="모두의창업 AI 솔루션 생태계 데이터 분석 리포트" />
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="datamap.css" />
+</head>
+<body>
+<div class="bg-fx"></div>
+<div class="bg-grid"></div>
+
+<header class="topbar">
+  <a class="logo" href="/">
+    <div class="logo-mark">M</div>
+    <b>모두레이터</b>
+  </a>
+  <nav class="nav-links">
+    <a class="nav-link" href="/">홈</a>
+    <a class="nav-link" href="/#chat">솔루션 찾기</a>
+    <a class="nav-link" href="/#browse">솔루션 탐색</a>
+    <a class="nav-link active" href="datamap.html">데이터맵</a>
+  </nav>
+  <button class="login-btn">로그인</button>
+</header>
+
+<main class="dm" id="dm">
+  <!-- 0. 리포트 헤더 -->
+  <section class="dm-hero reveal">
+    <div class="dm-kicker">DATA REPORT · 2026</div>
+    <h1>모두의창업<br /><em>AI 솔루션 생태계</em> 데이터맵</h1>
+    <p class="dm-lead">
+      공급기업 <b id="kOrg">283</b>곳이 등록한 <b id="kSol">407</b>개 AI 솔루션을
+      직접 수집·분류·검증했습니다. 어디에 솔루션이 몰려 있고, 어디가 비어 있으며,
+      창업자는 어떻게 접근하면 좋은지 — 데이터로 읽는 한 장의 지도입니다.
+    </p>
+    <div class="dm-keystats" id="keystats"></div>
+  </section>
+
+  <!-- 포스터: 한눈에 보는 분야 지형도 (트리맵) -->
+  <section class="dm-poster reveal">
+    <div class="dm-poster-head">
+      <h2>한눈에 보는 분야 지형도</h2>
+      <p>타일 크기 = 솔루션 수(시장 규모). 클릭하면 해당 분야 탐색으로 이동합니다.</p>
+    </div>
+    <svg id="treemap" class="dm-treemap"></svg>
+  </section>
+
+  <!-- 포스터: 수요·공급 포지셔닝 맵 -->
+  <section class="dm-poster reveal">
+    <div class="dm-poster-head">
+      <h2>수요·공급 포지셔닝 맵</h2>
+      <p>오른쪽일수록 공급(솔루션 수)이 많고, 위쪽일수록 수요(관심도)가 높습니다.
+         좌상단이 <b class="blue">블루오션</b>, 우하단이 <b class="red">레드오션</b>입니다.</p>
+    </div>
+    <svg id="quadrant" class="dm-quadrant"></svg>
+  </section>
+
+  <!-- 1. 분야 분포 -->
+  <section class="dm-sec reveal">
+    <div class="dm-sec-head">
+      <span class="dm-num">01</span>
+      <div>
+        <h2>시장의 무게중심</h2>
+        <p>10개 분야 중 <b>마케팅/콘텐츠</b>에 솔루션의 1/3이 몰려 있습니다. 반면 교육·법률·커머스는 한 자릿수에 머뭅니다.</p>
+      </div>
+    </div>
+    <div class="dm-dist" id="dist"></div>
+  </section>
+
+  <!-- 2. 수요 vs 공급 -->
+  <section class="dm-sec reveal">
+    <div class="dm-sec-head">
+      <span class="dm-num">02</span>
+      <div>
+        <h2>수요와 공급의 엇갈림</h2>
+        <p>솔루션 수(공급)와 모두의창업 등록 관심도(수요, 좋아요)를 겹쳐 보면 시장의 빈틈이 드러납니다.
+           공급은 많은데 관심이 낮으면 <b class="red">레드오션</b>, 공급은 적은데 관심이 높으면 <b class="blue">블루오션</b>입니다.</p>
+      </div>
+    </div>
+    <div class="dm-gap" id="gap"></div>
+    <div class="dm-gap-legend">
+      <span><i class="dot supply"></i> 공급 (솔루션 수)</span>
+      <span><i class="dot demand"></i> 수요 (솔루션당 평균 관심도)</span>
+    </div>
+  </section>
+
+  <!-- 3. 신뢰도 지형 -->
+  <section class="dm-sec reveal">
+    <div class="dm-sec-head">
+      <span class="dm-num">03</span>
+      <div>
+        <h2>얼마나 검증되었나</h2>
+        <p>우리는 각 솔루션의 홈페이지를 실제 브라우저로 열어 첫 화면을 검증했습니다.
+           <b>약 46%는 홈페이지 URL이 없어</b> 등록 설명만으로 분류됐다는 점을 숨기지 않고 보여줍니다.</p>
+      </div>
+    </div>
+    <div class="dm-trust">
+      <div class="dm-donut-wrap">
+        <svg viewBox="0 0 200 200" id="donut" class="dm-donut"></svg>
+        <div class="dm-donut-center">
+          <b id="verPct">54%</b>
+          <span>홈페이지 검증</span>
+        </div>
+      </div>
+      <div class="dm-tiers" id="tiers"></div>
+    </div>
+  </section>
+
+  <!-- 4. 기회 영역 -->
+  <section class="dm-sec reveal">
+    <div class="dm-sec-head">
+      <span class="dm-num">04</span>
+      <div>
+        <h2>기회는 어디에</h2>
+        <p>공급이 적으면서 관심도는 평균 이상인 분야가 진입 기회입니다.</p>
+      </div>
+    </div>
+    <div class="dm-oppo">
+      <div class="oppo-col red">
+        <h3>🔴 포화 영역</h3>
+        <p class="oppo-desc">이미 많은 솔루션이 경쟁 중 — 차별화가 필요합니다.</p>
+        <div id="oppoSat"></div>
+      </div>
+      <div class="oppo-col blue">
+        <h3>🔵 기회 영역</h3>
+        <p class="oppo-desc">관심 대비 솔루션이 부족 — 비어 있는 시장입니다.</p>
+        <div id="oppoGap"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. 창업 여정 동선 -->
+  <section class="dm-sec reveal">
+    <div class="dm-sec-head">
+      <span class="dm-num">05</span>
+      <div>
+        <h2>창업 단계별 접근 동선</h2>
+        <p>막연한 탐색 대신, 지금 내 단계의 고민에서 출발하세요.</p>
+      </div>
+    </div>
+    <div class="dm-journey" id="journey"></div>
+  </section>
+
+  <!-- 06. 모두레이터 자체 인기 -->
+  <section class="dm-sec reveal">
+    <div class="dm-sec-head">
+      <span class="dm-num">06</span>
+      <div>
+        <h2>모두레이터에서 주목받는 솔루션</h2>
+        <p>모두의창업 좋아요와 별개로, <b>모두레이터 사용자들이 직접 살펴보고 클릭한</b> 데이터로 집계한 자체 인기 순위입니다.</p>
+      </div>
+    </div>
+    <div class="dm-mine" id="minePopular"></div>
+  </section>
+
+  <footer class="dm-foot">
+    데이터 출처: 모두의창업 공개 데이터 · 분류·검증: <b style="color:var(--cyan)">순순팩토리 SAM</b> 기반 분석 파이프라인 · 관심도는 모두의창업 공개 좋아요 수 기준 · <a href="about.html" style="color:var(--blue-2)">기술 소개 →</a>
+  </footer>
+</main>
+
+<script type="module" src="firebase.js"></script>
+<script src="datamap.js"></script>
+</body>
+</html>

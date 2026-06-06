@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>기술 소개 — 모두레이터 by 순순팩토리</title>
+<meta name="description" content="모두레이터는 어떻게 만들어졌나 — 데이터 수집·분류·검증 파이프라인과 순순팩토리 SAM 기반 AI 추천 엔진" />
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="datamap.css" />
+<link rel="stylesheet" href="about.css" />
+</head>
+<body>
+<div class="bg-fx"></div>
+<div class="bg-grid"></div>
+
+<header class="topbar">
+  <a class="logo" href="/"><div class="logo-mark">M</div><b>모두레이터</b></a>
+  <nav class="nav-links">
+    <a class="nav-link" href="/">홈</a>
+    <a class="nav-link" href="datamap.html">데이터맵</a>
+    <a class="nav-link active" href="about.html">기술 소개</a>
+  </nav>
+  <button class="login-btn">로그인</button>
+</header>
+
+<main class="ab">
+  <!-- 헤더 -->
+  <section class="ab-hero reveal">
+    <div class="ab-kicker">HOW IT'S BUILT</div>
+    <h1>데이터로 검증하고<br /><em>AI가 안내하는</em> 솔루션 큐레이터</h1>
+    <p class="ab-lead">
+      모두레이터는 <b>모두의창업</b> 공개 데이터를 바탕으로,
+      <b>순순팩토리(SoonSoon Factory)</b>의 <b>SAM</b> AI 엔진 위에서 제작된 실험 서비스입니다.
+      단순 목록이 아니라, 수집 → 분류 → 검증 → 추천까지 이어지는 데이터 파이프라인으로 동작합니다.
+    </p>
+    <div class="ab-badge">
+      <span class="ab-badge-dot"></span>
+      Powered by <b>SAM</b> · SoonSoon Factory AI Platform
+    </div>
+  </section>
+
+  <!-- 파이프라인 -->
+  <section class="ab-sec reveal">
+    <div class="ab-sec-head"><span class="dm-num">01</span><div>
+      <h2>4단계 데이터 파이프라인</h2>
+      <p>원천 데이터를 그대로 쓰지 않습니다. 수집한 데이터를 재가공·검증해 추천에 적합한 형태로 만듭니다.</p>
+    </div></div>
+    <div class="ab-pipe" id="pipe"></div>
+  </section>
+
+  <!-- 분석 기법 -->
+  <section class="ab-sec reveal">
+    <div class="ab-sec-head"><span class="dm-num">02</span><div>
+      <h2>적용한 분석·검증 기법</h2>
+      <p>업계에서 검증된 정보 검색·랭킹·신뢰도 기법을 조합했습니다.</p>
+    </div></div>
+    <div class="ab-tech" id="tech"></div>
+  </section>
+
+  <!-- 신뢰도 검증 -->
+  <section class="ab-sec reveal">
+    <div class="ab-sec-head"><span class="dm-num">03</span><div>
+      <h2>홈페이지 실측 검증</h2>
+      <p>등록 설명만 믿지 않습니다. 각 솔루션의 홈페이지를 실제 브라우저로 열어 첫 화면을 확인했습니다.</p>
+    </div></div>
+    <div class="ab-verify" id="verify"></div>
+  </section>
+
+  <!-- 품질 지표 -->
+  <section class="ab-sec reveal">
+    <div class="ab-sec-head"><span class="dm-num">04</span><div>
+      <h2>측정 가능한 품질</h2>
+      <p>추천 품질을 추측이 아니라 숫자로 관리합니다. 자연어 스트레스 테스트와 사용자 피드백을 함께 추적합니다.</p>
+    </div></div>
+    <div class="ab-metrics" id="metrics"></div>
+  </section>
+
+  <!-- SAM 크레딧 -->
+  <section class="ab-cta reveal">
+    <div class="ab-cta-inner">
+      <div class="ab-cta-badge">SAM</div>
+      <h2>이 모든 추천은 <em>SAM</em> 위에서 돌아갑니다</h2>
+      <p>
+        모두레이터의 대화형 추천은 순순팩토리의 통합 AI 게이트웨이 <b>SAM</b>을 통해
+        최적의 모델로 라우팅됩니다. 여러 LLM을 하나의 API로 호출하고, 비용·품질을 함께 관리하는
+        SAM 덕분에 가볍고 빠른 추천이 가능합니다.
+      </p>
+      <a class="ab-cta-btn" href="https://sam.soonsoon.ai" target="_blank" rel="noopener">SAM 알아보기 →</a>
+    </div>
+  </section>
+
+  <footer class="dm-foot">
+    모두레이터는 모두의창업 공개 데이터를 기반으로 순순팩토리 SAM 솔루션으로 제작된 실험 서비스입니다.<br/>
+    데이터 분류·검증·추천 파이프라인 © SoonSoon Factory
+  </footer>
+</main>
+
+<script type="module" src="firebase.js"></script>
+<script src="about.js"></script>
+</body>
+</html>

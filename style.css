@@ -207,6 +207,13 @@ body.chat-mode footer { display: none; }
 .intent-chips button { font-size: 13px; border: 1px solid var(--blue); color: var(--blue-2); padding: 8px 14px; border-radius: 100px; transition: all .18s; }
 .intent-chips button:hover { background: var(--blue); color: #fff; }
 
+/* 답변 피드백 */
+.fb { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--line); }
+.fb-q { font-size: 12px; color: var(--txt-3); margin-right: 2px; }
+.fb button { width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--line); font-size: 14px; transition: all .16s; }
+.fb button:hover { border-color: var(--blue); background: var(--panel-2); transform: translateY(-1px); }
+.fb-done { font-size: 12.5px; color: var(--cyan); }
+
 .typing { display: inline-flex; gap: 5px; padding: 3px 0; }
 .typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--blue-2); animation: blink 1.2s infinite both; }
 .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}

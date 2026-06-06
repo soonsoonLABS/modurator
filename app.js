@@ -10,6 +10,38 @@ const API_BASE =
 // 모든 API 호출은 이 헬퍼를 통해 (API_BASE 자동 적용)
 const api = (path, opts) => fetch(API_BASE + path, opts);
 
+// GA4 이벤트 (firebase.js가 window.gaTrack 노출; 없으면 무시)
+const ga = (name, params) => { try { if (window.gaTrack) window.gaTrack(name, params); } catch {} };
+
+// 플랫폼 자체 사용 이벤트 로깅 (자체 인기 랭킹용) — 실패해도 무시
+function track(eventType, solutionId, saiCategory) {
+  try {
+    api("/api/event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event_type: eventType, solution_id: solutionId || null, sai_category: saiCategory || null }),
+      keepalive: true,
+    }).catch(() => {});
+  } catch {}
+}
+
+// 세션 ID (검색 묶음 추적 — 재검색=불만족 추론용)
+const SESSION_ID = (() => {
+  let s = sessionStorage.getItem("modu_sid");
+  if (!s) { s = "s" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); sessionStorage.setItem("modu_sid", s); }
+  return s;
+})();
+
+// 답변 피드백 (좋아요/싫어요)
+function sendFeedback(query, rating) {
+  try {
+    api("/api/feedback", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: SESSION_ID, query, rating }), keepalive: true,
+    }).catch(() => {});
+  } catch {}
+}
+
 const TIER_LABEL = {
   strong: "검증됨",
   usable: "추천",
@@ -84,6 +116,7 @@ function solutionCard(c, opts = {}) {
       <div class="scard-foot">${cat}${tags}${tierBadge}</div>
     </div>`;
   el.addEventListener("click", () => openModal(c.id));
+  track("impression", c.id, c.sai_category);
   return el;
 }
 
@@ -226,11 +259,33 @@ function fillSai(node, data) {
         .join("") +
       `</div>`;
   }
-  node.innerHTML = `<span class="bot-dot">🤖</span><div class="bubble"><div class="body">${fmt(data.reply)}</div>${chips}</div>`;
+  node.innerHTML = `<span class="bot-dot">🤖</span><div class="bubble"><div class="body">${fmt(data.reply)}</div>${chips}${fbHtml(data)}</div>`;
   node.querySelectorAll("[data-intent-query]").forEach((b) =>
     b.addEventListener("click", () => send(b.dataset.intentQuery))
   );
+  // 피드백 버튼 바인딩
+  const fb = node.querySelector(".fb");
+  if (fb) {
+    fb.querySelectorAll("button").forEach((btn) =>
+      btn.addEventListener("click", () => {
+        sendFeedback(data.meta.original_query || "", btn.dataset.fb);
+        ga("answer_feedback", { rating: btn.dataset.fb });
+        fb.innerHTML = `<span class="fb-done">피드백 감사합니다 🙏</span>`;
+      })
+    );
+  }
   scrollThread();
+}
+
+// 추천 답변에만 좋아요/싫어요 노출 (clarify엔 미노출)
+function fbHtml(data) {
+  if (data.meta && data.meta.query_action === "clarify") return "";
+  if (!data.reply || data.reply.length < 10) return "";
+  return `<div class="fb">
+    <span class="fb-q">이 답변이 도움이 됐나요?</span>
+    <button data-fb="up" aria-label="좋아요">👍</button>
+    <button data-fb="down" aria-label="싫어요">👎</button>
+  </div>`;
 }
 function renderRec(cards, groups = []) {
   const list = $("#recList");
@@ -265,6 +320,7 @@ function renderRec(cards, groups = []) {
 async function send(text) {
   if (busy || !text.trim()) return;
   busy = true;
+  ga("search", { search_term: text.slice(0, 100) });
   go("chat");
   addUser(text);
   history.push({ role: "user", content: text });
@@ -273,7 +329,7 @@ async function send(text) {
     const res = await api("/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, history: history.slice(0, -1) }),
+      body: JSON.stringify({ message: text, history: history.slice(0, -1), session_id: SESSION_ID }),
     });
     const data = await res.json();
     data.meta = data.meta || {};
@@ -351,6 +407,8 @@ async function openModal(id) {
   document.body.style.overflow = "hidden";
   try {
     const d = await (await api("/api/solution/" + id)).json();
+    track("view", id, d.sai_category);
+    ga("view_solution", { item_id: id, item_name: d.name, item_category: d.sai_category });
     const tier = d.recommendation_tier;
     const tierBadge = tier ? `<span class="tier ${tier}">${TIER_LABEL[tier] || tier}</span>` : "";
     const cat = d.sai_category ? `<span class="chip-cat">${esc(d.sai_category)}</span>` : "";
@@ -404,6 +462,8 @@ async function openModal(id) {
         <div class="modal-cta">${site}<button class="btn-ghost" id="askAboutBtn">이 솔루션 모두레이터에게 묻기</button></div>
       </div>`;
     $("#modalClose").addEventListener("click", closeModal);
+    const siteLink = m.querySelector(".modal-cta a.btn-primary");
+    if (siteLink) siteLink.addEventListener("click", () => { track("click", id, d.sai_category); ga("solution_site_click", { item_id: id, item_name: d.name }); });
     const ask = $("#askAboutBtn");
     if (ask)
       ask.addEventListener("click", () => {
