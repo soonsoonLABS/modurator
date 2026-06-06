@@ -510,5 +510,30 @@ $("#resetBtn").addEventListener("click", () => {
   $("#recHint").textContent = "대화에 따라 솔루션이 나타나요";
 });
 
+// 실제 상단바 높이를 CSS 변수로 반영 (채팅 레이아웃 높이 계산 정확도)
+function syncTopbarHeight() {
+  const tb = document.querySelector(".topbar");
+  if (tb) document.documentElement.style.setProperty("--topbar-h", tb.offsetHeight + "px");
+}
+syncTopbarHeight();
+window.addEventListener("resize", syncTopbarHeight);
+
 // ---------- 시작 ----------
 loadHome();
+
+// URL 해시/쿼리로 초기 뷰 결정 (데이터맵·기술소개 페이지에서 넘어올 때)
+function routeFromUrl() {
+  const params = new URLSearchParams(location.search);
+  const cat = params.get("cat");
+  const hash = (location.hash || "").replace("#", "");
+  if (hash === "browse" || cat) {
+    go("browse");
+    if (cat) setTimeout(() => filterByCat(cat, cat), 120);
+  } else if (hash === "chat") {
+    go("chat");
+  } else {
+    go("home");
+  }
+}
+routeFromUrl();
+window.addEventListener("hashchange", routeFromUrl);

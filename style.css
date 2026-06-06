@@ -184,7 +184,7 @@ em { font-style: normal; color: var(--blue-2); }
 /* 채팅 모드: 페이지 전체를 뷰포트에 고정, 내부 패널만 스크롤 */
 body.chat-mode { overflow: hidden; }
 body.chat-mode footer { display: none; }
-.chat-wrap { display: grid; grid-template-columns: 1.05fr .95fr; max-width: var(--maxw); margin: 0 auto; height: calc(100vh - 64px); height: calc(100dvh - 64px); min-height: 0; }
+.chat-wrap { display: grid; grid-template-columns: 1.05fr .95fr; max-width: var(--maxw); margin: 0 auto; height: calc(100dvh - var(--topbar-h, 64px)); min-height: 0; }
 .chat-side { display: flex; flex-direction: column; border-right: 1px solid var(--line); min-height: 0; }
 .chat-bar { display: flex; align-items: center; justify-content: space-between; padding: 16px clamp(18px, 3vw, 34px); border-bottom: 1px solid var(--line); }
 .chat-bar .title { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 16px; }
@@ -320,4 +320,12 @@ footer { border-top: 1px solid var(--line); padding: 28px clamp(18px,5vw,48px); 
   .chat-wrap { grid-template-columns: 1fr; height: auto; }
   .chat-side { min-height: 60vh; }
   .trust { grid-template-columns: repeat(2, 1fr); }
+  /* 모바일: 채팅 모드에서도 페이지 스크롤 허용 (입력창/메뉴 잘림 방지) */
+  body.chat-mode { overflow: auto; }
+  body.chat-mode footer { display: block; }
+  /* 상단 네비가 많아지면 가로 스크롤로 모두 접근 가능하게 */
+  .topbar { gap: 10px; }
+  .nav-links { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; scrollbar-width: none; }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-link { white-space: nowrap; padding: 9px 12px; font-size: 13px; }
 }
