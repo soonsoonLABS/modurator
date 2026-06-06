@@ -351,13 +351,15 @@ async function loadMinePopular() {
       </div>`;
       return;
     }
-    const maxScore = Math.max(...d.items.map((x) => x.score));
+    const maxScore = Math.max(...d.items.map((x) => x.score || 0), 1);
     el.innerHTML = d.items.map((t, i) => `
       <div class="mine-row">
         <div class="mine-rank">${i + 1}</div>
         <div class="mine-main">
           <div class="mine-name">${esc(t.name)}</div>
-          <div class="mine-org">${esc(t.org || "")}${t.category ? " · " + esc(t.category) : ""}</div>
+          <div class="mine-org">${esc(t.org || "")}${t.category ? " · " + esc(t.category) : ""}${
+            t.rating_avg ? ` · <span class="mine-rating">★ ${Number(t.rating_avg).toFixed(1)}</span>` : ""
+          }</div>
           <div class="mine-bar"><i style="width:${(t.score / maxScore) * 100}%"></i></div>
         </div>
         <div class="mine-score"><b>${num(t.score)}</b><span>관심 점수</span></div>

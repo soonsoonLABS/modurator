@@ -49,6 +49,13 @@ const TIER_LABEL = {
   review: "비교 후보",
   weak: "비교 후보",
 };
+const RATING_LABELS = [
+  ["accuracy", "설명과 실제가 동일해요"],
+  ["homepage", "홈페이지가 설명이 충분해요"],
+  ["pricing", "과금 체계가 이해하기 편해요"],
+  ["usefulness", "실제로 도움이 됐어요"],
+  ["onboarding", "시작하기 쉬워요"],
+];
 
 function esc(t) {
   return (t || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -65,6 +72,39 @@ function num(n) {
 function pct(part, whole) {
   if (!whole) return "0%";
   return Math.round((Number(part || 0) / Number(whole)) * 100) + "%";
+}
+function ratingValue(v) {
+  const n = Number(v || 0);
+  return n ? n.toFixed(1) : "";
+}
+function ratingMeta(summary) {
+  if (!summary || !summary.overall_avg) return "";
+  return `<span class="rating-meta" id="modalRatingMeta">★ ${ratingValue(summary.overall_avg)} (${num(summary.total_votes || 0)})</span>`;
+}
+function ratingSection(d) {
+  const summary = d.ratings_summary || {};
+  const current = summary.overall_avg
+    ? `<div class="rating-current" id="ratingCurrent">현재 평균 <b>★ ${ratingValue(summary.overall_avg)}</b><span>${num(summary.total_votes || 0)}명 평가</span></div>`
+    : `<div class="rating-current empty" id="ratingCurrent">아직 항목별 평가가 없어요</div>`;
+  const rows = RATING_LABELS.map(([key, label]) => {
+    const avg = summary[key]?.avg ? `평균 ${ratingValue(summary[key].avg)}` : "";
+    const stars = [1, 2, 3, 4, 5]
+      .map((score) => `<button type="button" data-score="${score}" aria-label="${attr(label)} ${score}점">★</button>`)
+      .join("");
+    return `<div class="rating-row">
+      <div class="rating-label"><span>${esc(label)}</span>${avg ? `<em>${esc(avg)}</em>` : ""}</div>
+      <div class="rating-stars" data-criterion="${key}">${stars}</div>
+    </div>`;
+  }).join("");
+  return `<div class="modal-sec rating-panel" id="ratingPanel">
+    <h4>이 솔루션 평가하기</h4>
+    ${current}
+    <div class="rating-grid">${rows}</div>
+    <div class="rating-actions">
+      <button class="btn-ghost rating-submit" id="ratingSubmit" type="button">평가 제출</button>
+      <span class="rating-status" id="ratingStatus"></span>
+    </div>
+  </div>`;
 }
 
 // ---------- 뷰 라우팅 ----------
@@ -351,6 +391,15 @@ let curSort = "like";
 
 async function loadBrowse() {
   browseLoaded = true;
+  // 데이터 신선도 배지
+  try {
+    const m = await (await api("/api/meta")).json();
+    const el = $("#dataMeta");
+    if (el && m.built_at) {
+      el.innerHTML = `<span class="dm-badge">📦 데이터 ${esc(m.version || "")}</span>
+        <span>모두의창업에서 <b>${esc(m.built_at)}</b> 수집 · 솔루션 ${num(m.solutions)}개 · 기업 ${num(m.organizations)}개</span>`;
+    }
+  } catch {}
   // 필터 칩 구성
   try {
     const { categories } = await (await api("/api/categories")).json();
@@ -398,6 +447,92 @@ $("#sortSel").addEventListener("change", (e) => {
   fetchBrowse();
 });
 
+function paintStars(group, score) {
+  group.querySelectorAll("button").forEach((btn) => {
+    btn.classList.toggle("active", Number(btn.dataset.score) <= score);
+  });
+}
+
+function updateRatingSummary(summary) {
+  const current = $("#ratingCurrent");
+  if (current) {
+    current.classList.remove("empty");
+    if (summary && summary.overall_avg) {
+      current.innerHTML = `현재 평균 <b>★ ${ratingValue(summary.overall_avg)}</b><span>${num(summary.total_votes || 0)}명 평가</span>`;
+    }
+  }
+  if (summary && summary.overall_avg) {
+    let meta = $("#modalRatingMeta");
+    const metaWrap = document.querySelector(".modal-meta");
+    if (!meta && metaWrap) {
+      meta = document.createElement("span");
+      meta.className = "rating-meta";
+      meta.id = "modalRatingMeta";
+      metaWrap.appendChild(meta);
+    }
+    if (meta) meta.textContent = `★ ${ratingValue(summary.overall_avg)} (${num(summary.total_votes || 0)})`;
+  }
+  RATING_LABELS.forEach(([key]) => {
+    const row = document.querySelector(`.rating-stars[data-criterion="${key}"]`)?.closest(".rating-row");
+    const avg = summary?.[key]?.avg;
+    const label = row?.querySelector(".rating-label");
+    if (label && avg) {
+      let em = label.querySelector("em");
+      if (!em) {
+        em = document.createElement("em");
+        label.appendChild(em);
+      }
+      em.textContent = `평균 ${ratingValue(avg)}`;
+    }
+  });
+}
+
+function bindRatingForm(d) {
+  const panel = $("#ratingPanel");
+  if (!panel) return;
+  const selected = {};
+  panel.querySelectorAll(".rating-stars").forEach((group) => {
+    group.querySelectorAll("button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const score = Number(btn.dataset.score);
+        selected[group.dataset.criterion] = score;
+        paintStars(group, score);
+      });
+    });
+  });
+  const status = $("#ratingStatus");
+  const submit = $("#ratingSubmit");
+  submit.addEventListener("click", async () => {
+    if (Object.keys(selected).length < RATING_LABELS.length) {
+      status.textContent = "5개 항목을 모두 선택해 주세요.";
+      return;
+    }
+    const overall = RATING_LABELS.reduce((sum, [key]) => sum + selected[key], 0) / RATING_LABELS.length;
+    submit.disabled = true;
+    status.textContent = "저장 중…";
+    try {
+      const res = await api("/api/rate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ solution_id: d.id, session_id: SESSION_ID, ratings: selected }),
+      });
+      const saved = await res.json();
+      if (!saved.ok) {
+        status.textContent = "평가를 저장하지 못했어요.";
+        submit.disabled = false;
+        return;
+      }
+      ga("solution_rating", { item_id: d.id, overall: Number(overall.toFixed(1)) });
+      const fresh = await (await api("/api/solution/" + d.id)).json();
+      updateRatingSummary(fresh.ratings_summary || {});
+      status.textContent = "평가 감사합니다.";
+    } catch {
+      status.textContent = "연결에 문제가 생겼어요.";
+      submit.disabled = false;
+    }
+  });
+}
+
 // ---------- 상세 모달 ----------
 async function openModal(id) {
   const bg = $("#modalBg");
@@ -412,6 +547,7 @@ async function openModal(id) {
     const tier = d.recommendation_tier;
     const tierBadge = tier ? `<span class="tier ${tier}">${TIER_LABEL[tier] || tier}</span>` : "";
     const cat = d.sai_category ? `<span class="chip-cat">${esc(d.sai_category)}</span>` : "";
+    const ratingBadge = ratingMeta(d.ratings_summary);
     const verifyNote =
       tier === "unverified"
         ? `<span style="font-size:12px;color:var(--txt-3)">· 홈페이지 미검증, 등록 설명 기준</span>`
@@ -451,17 +587,18 @@ async function openModal(id) {
         <button class="modal-close" id="modalClose">✕</button>
         <div class="modal-name">${esc(d.name)}</div>
         <div class="modal-org">${esc(d.org || "")}</div>
-        <div class="modal-meta">${cat}${tierBadge}${verifyNote}${
+        <div class="modal-meta">${cat}${tierBadge}${ratingBadge}${verifyNote}${
       d.like_count ? `<span class="scard-like">♥ ${d.like_count.toLocaleString()}</span>` : ""
     }</div>
       </div>
       <div class="modal-body">
         <div class="modal-sec"><div class="modal-desc">${esc(d.description || d.summary || "")}</div></div>
         ${tags ? `<div class="modal-sec"><h4>이런 일에 좋아요</h4><div class="modal-tags">${tags}</div></div>` : ""}
-        ${prices}${free}${siblings}
+        ${prices}${free}${siblings}${ratingSection(d)}
         <div class="modal-cta">${site}<button class="btn-ghost" id="askAboutBtn">이 솔루션 모두레이터에게 묻기</button></div>
       </div>`;
     $("#modalClose").addEventListener("click", closeModal);
+    bindRatingForm(d);
     const siteLink = m.querySelector(".modal-cta a.btn-primary");
     if (siteLink) siteLink.addEventListener("click", () => { track("click", id, d.sai_category); ga("solution_site_click", { item_id: id, item_name: d.name }); });
     const ask = $("#askAboutBtn");
@@ -517,6 +654,7 @@ function syncTopbarHeight() {
 }
 syncTopbarHeight();
 window.addEventListener("resize", syncTopbarHeight);
+window.addEventListener("modu:presence-layout", syncTopbarHeight);
 
 // ---------- 시작 ----------
 loadHome();
