@@ -386,6 +386,32 @@ body.chat-mode footer { display: none; }
 
 footer { border-top: 1px solid var(--line); padding: 28px clamp(18px,5vw,48px); text-align: center; font-size: 12.5px; color: var(--txt-3); }
 
+/* ===== 하단 플로팅 입력 독 (홈/탐색) ===== */
+.dock {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 90;
+  display: flex; justify-content: center;
+  padding: 14px clamp(14px, 4vw, 28px) calc(16px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--bg) 55%, transparent);
+  pointer-events: none;
+}
+.dock-inner {
+  pointer-events: auto;
+  display: flex; align-items: center; gap: 10px; width: 100%; max-width: 680px;
+  background: var(--panel); border: 1.5px solid var(--line-2);
+  border-radius: 100px; padding: 7px 7px 7px 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(63,123,255,.08);
+}
+.dock-inner:focus-within { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(63,123,255,.15), 0 12px 40px rgba(0,0,0,.5); }
+.dock-bot { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(145deg, var(--blue), var(--cyan)); display: grid; place-items: center; font-size: 14px; flex-shrink: 0; }
+.dock-inner input { flex: 1; border: none; background: none; outline: none; color: var(--txt); font-family: inherit; font-size: 15px; min-width: 0; }
+.dock-inner input::placeholder { color: var(--txt-3); }
+.dock-go { width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(145deg, var(--blue), var(--blue-2)); color: #fff; font-size: 18px; box-shadow: 0 0 16px var(--glow); transition: transform .15s; }
+.dock-go:hover { transform: scale(1.06); }
+/* 채팅 모드에선 독 숨김 (채팅 자체 입력창 사용) */
+body.chat-mode .dock { display: none; }
+/* 콘텐츠가 독에 가리지 않도록 여백 */
+#view-home, #view-browse { padding-bottom: 90px; }
+
 @media (max-width: 900px) {
   .chat-wrap { grid-template-columns: 1fr; }
   .trust { grid-template-columns: repeat(2, 1fr); }

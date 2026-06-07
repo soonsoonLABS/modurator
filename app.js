@@ -370,25 +370,59 @@ async function send(text) {
   history.push({ role: "user", content: text });
   const typing = addTyping();
   try {
-    // 모바일 네트워크 대비: 45초 타임아웃 + 명시적 에러 분기
     const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 45000);
+    const timer = setTimeout(() => ctrl.abort(), 60000);
     let res;
     try {
-      res = await api("/api/chat", {
+      res = await api("/api/chat/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, history: history.slice(0, -1), session_id: SESSION_ID }),
         signal: ctrl.signal,
       });
-    } finally {
+    } catch (e) {
       clearTimeout(timer);
+      throw e;
     }
-    if (!res.ok) {
-      fillSai(typing, { reply: `서버 응답 오류 (${res.status})예요. 잠시 후 다시 시도해 주세요.` });
-      return;
+    if (!res.ok || !res.body) {
+      clearTimeout(timer);
+      // 스트림 불가 시 일반 엔드포인트로 폴백
+      return await sendFallback(text, typing);
     }
-    const data = await res.json();
+
+    // SSE 파싱하며 글자 차오르게 표시
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    let acc = "";
+    let finalData = null;
+    // 타이핑 점 제거하고 본문 컨테이너 준비
+    prepStreamBubble(typing);
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buf.indexOf("\n\n")) >= 0) {
+        const block = buf.slice(0, idx);
+        buf = buf.slice(idx + 2);
+        const ev = parseSSE(block);
+        if (!ev) continue;
+        if (ev.event === "delta") {
+          acc += ev.data.text || "";
+          setStreamBody(typing, acc);
+        } else if (ev.event === "replace") {
+          acc = ev.data.text || "";
+          setStreamBody(typing, acc);
+        } else if (ev.event === "done") {
+          finalData = ev.data;
+        }
+      }
+    }
+    clearTimeout(timer);
+    // 최종 렌더 (마크다운/카드/피드백 포함)
+    const data = finalData || { meta: {} };
+    data.reply = acc || "죄송해요, 답변 생성에 문제가 있었어요.";
     data.meta = data.meta || {};
     data.meta.original_query = text;
     fillSai(typing, data);
@@ -401,6 +435,42 @@ async function send(text) {
   } finally {
     busy = false;
   }
+}
+
+// 스트림 불가 환경 폴백 (구형 브라우저 등)
+async function sendFallback(text, typing) {
+  try {
+    const res = await api("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text, history: history.slice(0, -1), session_id: SESSION_ID }),
+    });
+    const data = await res.json();
+    data.meta = data.meta || {};
+    data.meta.original_query = text;
+    fillSai(typing, data);
+    history.push({ role: "assistant", content: data.reply });
+  } catch {
+    fillSai(typing, { reply: "네트워크 연결을 확인해 주세요. (서버에 닿지 못했어요)" });
+  }
+}
+
+function parseSSE(block) {
+  let event = "message", data = "";
+  block.split("\n").forEach((line) => {
+    if (line.startsWith("event:")) event = line.slice(6).trim();
+    else if (line.startsWith("data:")) data += line.slice(5).trim();
+  });
+  if (!data) return null;
+  try { return { event, data: JSON.parse(data) }; } catch { return null; }
+}
+// 스트리밍 중 말풍선을 본문 컨테이너로 준비 (타이핑 점 제거)
+function prepStreamBubble(node) {
+  node.innerHTML = `<span class="bot-dot">🤖</span><div class="bubble"><div class="body" data-stream></div></div>`;
+}
+function setStreamBody(node, text) {
+  const b = node.querySelector("[data-stream]");
+  if (b) { b.innerHTML = fmt(text); scrollThread(); }
 }
 
 // ---------- 탐색 ----------
@@ -646,13 +716,25 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ---------- 이벤트 바인딩 ----------
-$("#heroForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const v = $("#heroInput").value;
-  $("#heroInput").value = "";
-  send(v);
-});
+const heroForm = $("#heroForm");
+if (heroForm) {
+  heroForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const v = $("#heroInput").value;
+    $("#heroInput").value = "";
+    send(v);
+  });
+}
 $$(".suggest button").forEach((b) => b.addEventListener("click", () => send(b.textContent)));
+const dockForm = $("#dockForm");
+if (dockForm) {
+  dockForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const v = $("#dockInput").value;
+    $("#dockInput").value = "";
+    send(v);
+  });
+}
 $("#composer").addEventListener("submit", (e) => {
   e.preventDefault();
   const v = $("#chatInput").value;

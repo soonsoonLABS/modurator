@@ -37,10 +37,6 @@
       <b>모두레이터</b>가 더 잘 맞는 파트너를 추천하고 이유를 설명하며,
       <b id="solCount">407</b>개 검증된 AI 솔루션 중 당신에게 맞는 것을 골라드려요.
     </p>
-    <form class="searchbar" id="heroForm" autocomplete="off">
-      <input id="heroInput" placeholder="예) ERP 도입, 마케팅 자동화, 보안 솔루션 찾기" />
-      <button class="go" type="submit" aria-label="검색">↑</button>
-    </form>
     <div class="suggest">
       <button>사업계획서 쓰는 게 막막해요</button>
       <button>세금·회계 자동화하고 싶어요</button>
@@ -109,6 +105,15 @@
 </section>
 
 <footer>모두레이터는 모두의창업 공개 데이터를 기반으로 <b style="color:var(--cyan)">순순팩토리 SAM</b> 솔루션으로 제작된 실험 서비스입니다 · <a href="about.html" style="color:var(--blue-2)">기술 소개</a></footer>
+
+<!-- 하단 플로팅 입력창 (홈/탐색에서 표시, 채팅 진입 시 숨김) -->
+<form class="dock" id="dockForm" autocomplete="off">
+  <div class="dock-inner">
+    <span class="dock-bot">🤖</span>
+    <input id="dockInput" placeholder="모두레이터에게 바로 물어보세요…" />
+    <button class="dock-go" type="submit" aria-label="보내기">↑</button>
+  </div>
+</form>
 
 <div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
 <script type="module" src="firebase.js"></script>
