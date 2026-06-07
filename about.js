@@ -41,9 +41,9 @@ function render() {
   $("#verify").innerHTML = `
     <div class="verify-card">
       <div class="verify-big"><b id="vScore">54%</b><span>홈페이지 직접 검증 완료</span></div>
-      <p style="font-size:13.5px;color:var(--txt-2);line-height:1.6;margin-top:8px">
+      <p style="font-size:13.5px;color:var(--ltxt-2);line-height:1.6;margin-top:8px">
         URL이 있는 솔루션은 실제 브라우저로 열어 첫 화면을 확인했습니다.
-        URL이 없는 솔루션은 <b style="color:var(--txt)">'등록 설명 기준'</b>으로 솔직하게 구분합니다.</p>
+        URL이 없는 솔루션은 <b style="color:var(--ltxt)">'등록 설명 기준'</b>으로 솔직하게 구분합니다.</p>
     </div>
     <div class="verify-card">
       <h3>검증 시 확인 항목</h3>

@@ -35,11 +35,11 @@ const FALLBACK = {
 };
 
 const TIER_INFO = {
-  strong: { label: "검증됨 (strong)", color: "var(--green)" },
-  usable: { label: "추천 (usable)", color: "var(--cyan)" },
-  weak: { label: "비교 후보 (weak)", color: "var(--amber)" },
-  review: { label: "검토 필요 (review)", color: "var(--amber)" },
-  unverified: { label: "등록설명 기준 (미검증)", color: "#5f6f9a" },
+  strong: { label: "검증됨 (strong)", color: "#1a9960" },
+  usable: { label: "추천 (usable)", color: "var(--laccent)" },
+  weak: { label: "비교 후보 (weak)", color: "#c67a00" },
+  review: { label: "검토 필요 (review)", color: "#c67a00" },
+  unverified: { label: "등록설명 기준 (미검증)", color: "var(--ltxt-3)" },
 };
 
 // 고민 → 분야 동선 (창업 단계 순)
@@ -188,11 +188,11 @@ function renderQuadrant(cats, total) {
   let grid = "";
   for (let gx = 0; gx <= 5; gx++) {
     const xx = P + (iw / 5) * gx;
-    grid += `<line x1="${xx}" y1="${P}" x2="${xx}" y2="${P+ih}" stroke="rgba(120,150,220,.06)"/>`;
+    grid += `<line x1="${xx}" y1="${P}" x2="${xx}" y2="${P+ih}" stroke="var(--lline)" opacity="0.55"/>`;
   }
   for (let gy = 0; gy <= 5; gy++) {
     const yy = P + (ih / 5) * gy;
-    grid += `<line x1="${P}" y1="${yy}" x2="${P+iw}" y2="${yy}" stroke="rgba(120,150,220,.06)"/>`;
+    grid += `<line x1="${P}" y1="${yy}" x2="${P+iw}" y2="${yy}" stroke="var(--lline)" opacity="0.55"/>`;
   }
 
   const defs = cats.map((c, i) => {
@@ -223,8 +223,8 @@ function renderQuadrant(cats, total) {
     <rect x="${midX}" y="${midY}" width="${P+iw-midX}" height="${P+ih-midY}" fill="rgba(255,122,107,.06)" rx="4"/>
     ${grid}
     <!-- 평균선 -->
-    <line x1="${midX}" y1="${P}" x2="${midX}" y2="${P+ih}" stroke="var(--line-2)" stroke-dasharray="5 5"/>
-    <line x1="${P}" y1="${midY}" x2="${P+iw}" y2="${midY}" stroke="var(--line-2)" stroke-dasharray="5 5"/>
+    <line x1="${midX}" y1="${P}" x2="${midX}" y2="${P+ih}" stroke="var(--lline-2)" stroke-dasharray="5 5"/>
+    <line x1="${P}" y1="${midY}" x2="${P+iw}" y2="${midY}" stroke="var(--lline-2)" stroke-dasharray="5 5"/>
     <!-- 사분면 라벨 -->
     <text x="${P+14}" y="${P+24}" class="qd-zone blue">블루오션 · 공급↓ 수요↑</text>
     <text x="${P+iw-12}" y="${P+24}" class="qd-zone" text-anchor="end">경쟁 치열 · 공급↑ 수요↑</text>
@@ -291,7 +291,7 @@ function render(d) {
   $("#verPct").textContent = verPct + "%";
   drawDonut(d.verified, d.unverified, total);
   $("#tiers").innerHTML = d.tiers.map((t) => {
-    const info = TIER_INFO[t.tier] || { label: t.tier, color: "var(--blue)" };
+    const info = TIER_INFO[t.tier] || { label: t.tier, color: "var(--laccent)" };
     const p = Math.round((t.count / total) * 100);
     return `<div class="tier-row">
       <div class="tier-top"><span class="tl">${esc(info.label)}</span><span class="tn">${t.count}개 · ${p}%</span></div>
@@ -374,12 +374,12 @@ function drawDonut(verified, unverified, total) {
   const R = 80, C = 2 * Math.PI * R, cx = 100, cy = 100;
   const verLen = (verified / total) * C;
   svg.innerHTML = `
-    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--panel-2)" stroke-width="26" />
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--lbg-2)" stroke-width="26" />
     <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="url(#g)" stroke-width="26"
       stroke-linecap="round" stroke-dasharray="0 ${C}" id="donutArc">
     </circle>
     <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="var(--cyan)"/><stop offset="1" stop-color="var(--blue)"/>
+      <stop offset="0" stop-color="var(--laccent)"/><stop offset="1" stop-color="var(--laccent)"/>
     </linearGradient></defs>`;
   setTimeout(() => {
     const arc = $("#donutArc");

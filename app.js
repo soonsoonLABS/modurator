@@ -626,7 +626,7 @@ function bindRatingForm(d) {
 async function openModal(id) {
   const bg = $("#modalBg");
   const m = $("#modal");
-  m.innerHTML = `<div style="padding:60px;text-align:center;color:var(--txt-3)">불러오는 중…</div>`;
+  m.innerHTML = `<div style="padding:60px;text-align:center;color:var(--ltxt-3)">불러오는 중…</div>`;
   bg.classList.add("open");
   document.body.style.overflow = "hidden";
   try {
@@ -639,9 +639,9 @@ async function openModal(id) {
     const ratingBadge = ratingMeta(d.ratings_summary);
     const verifyNote =
       tier === "unverified"
-        ? `<span style="font-size:12px;color:var(--txt-3)">· 홈페이지 미검증, 등록 설명 기준</span>`
+        ? `<span style="font-size:12px;color:var(--ltxt-3)">· 홈페이지 미검증, 등록 설명 기준</span>`
         : tier && d.browser_score
-        ? `<span style="font-size:12px;color:var(--txt-3)">· 홈페이지 검증 ${d.browser_score}점</span>`
+        ? `<span style="font-size:12px;color:var(--ltxt-3)">· 홈페이지 검증 ${d.browser_score}점</span>`
         : "";
     const tags = [...(d.task_tags || []), ...(d.problem_tags || [])]
       .slice(0, 6)
@@ -700,7 +700,7 @@ async function openModal(id) {
       s.addEventListener("click", () => openModal(parseInt(s.dataset.sib)))
     );
   } catch {
-    m.innerHTML = `<div style="padding:60px;text-align:center;color:var(--txt-3)">정보를 불러오지 못했어요. <button class="modal-close" id="modalClose" style="position:static">✕</button></div>`;
+    m.innerHTML = `<div style="padding:60px;text-align:center;color:var(--ltxt-3)">정보를 불러오지 못했어요. <button class="modal-close" id="modalClose" style="position:static">✕</button></div>`;
     $("#modalClose").addEventListener("click", closeModal);
   }
 }

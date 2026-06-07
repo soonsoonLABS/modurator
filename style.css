@@ -54,21 +54,31 @@ body {
 body.chat-mode { background: var(--bg); color: var(--txt); }
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-em { font-style: normal; color: var(--blue-2); }
+em { font-style: normal; color: var(--laccent); }
+.hero em, body.chat-mode em { color: var(--blue-2); }
 
-/* ===== 다크 테마 커스텀 스크롤바 (전역) ===== */
+/* ===== 커스텀 스크롤바 ===== */
 /* Firefox */
-* { scrollbar-width: thin; scrollbar-color: rgba(91,147,255,.32) transparent; }
+* { scrollbar-width: thin; scrollbar-color: rgba(47,107,255,.28) transparent; }
+body.chat-mode * { scrollbar-color: rgba(91,147,255,.32) transparent; }
 /* WebKit (Chrome/Safari/Edge) */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(var(--blue), rgba(63,123,255,.35));
+  background: linear-gradient(var(--laccent), rgba(47,107,255,.35));
   border-radius: 100px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(var(--laccent), rgba(47,107,255,.55));
+  background-clip: padding-box;
+}
+body.chat-mode ::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--blue), rgba(63,123,255,.35));
+  background-clip: padding-box;
+}
+body.chat-mode ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(var(--blue-2), var(--blue));
   background-clip: padding-box;
 }
@@ -101,6 +111,7 @@ body.chat-mode .bg-fx, body.chat-mode .bg-grid { display: block; }
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px clamp(18px, 4vw, 48px);
   background: rgba(7, 11, 26, .72);
+  color: var(--txt);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--line);
 }
@@ -353,7 +364,11 @@ body.chat-mode footer { display: none; }
 .browse-grid .scard-sum { color: var(--ltxt-2); }
 .browse-grid .chip-cat { color: var(--laccent); background: var(--laccent-soft); }
 .browse-grid .chip-tag { color: var(--ltxt-2); border-color: var(--lline-2); }
+.browse-grid .tier.strong { color: #1a9960; background: rgba(26,153,96,.1); }
+.browse-grid .tier.usable { color: #2f6bff; background: rgba(47,107,255,.1); }
+.browse-grid .tier.review, .browse-grid .tier.weak { color: #c67a00; background: rgba(198,122,0,.1); }
 .browse-grid .tier.unverified { color: var(--ltxt-3); border-color: var(--lline-2); }
+.browse-grid .rec-empty { color: var(--ltxt-3); }
 
 /* ===================== 탐색 ===================== */
 .browse-head { max-width: var(--maxw); margin: 0 auto; padding: clamp(36px, 5vw, 56px) clamp(18px, 5vw, 48px) 0; }
@@ -389,7 +404,7 @@ body.chat-mode footer { display: none; }
 .price-row { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--lline); font-size: 14px; }
 .price-row .pl { color: var(--ltxt-2); }
 .price-row .pp { font-weight: 700; color: var(--ltxt); }
-.rating-meta { font-size: 11.5px; color: var(--amber); font-weight: 800; white-space: nowrap; }
+.rating-meta { font-size: 11.5px; color: var(--laccent); font-weight: 800; white-space: nowrap; }
 .rating-panel {
   border-top: 1px solid var(--lline);
   padding-top: 22px;
@@ -400,7 +415,7 @@ body.chat-mode footer { display: none; }
   font-size: 13px;
   margin-bottom: 14px;
 }
-.rating-current b { color: var(--amber); font-size: 15px; }
+.rating-current b { color: var(--laccent); font-size: 15px; }
 .rating-current span { color: var(--ltxt-3); font-size: 12px; }
 .rating-current.empty { color: var(--ltxt-3); }
 .rating-grid { display: flex; flex-direction: column; gap: 10px; }
@@ -441,6 +456,10 @@ body.chat-mode footer { display: none; }
 /* 모달 안 카테고리/태그 칩 라이트 */
 .modal .chip-cat { color: var(--laccent); background: var(--laccent-soft); }
 .modal .chip-tag { color: var(--ltxt-2); border-color: var(--lline-2); }
+.modal .scard-like { color: var(--ltxt-3); }
+.modal .tier.strong { color: #1a9960; background: rgba(26,153,96,.1); }
+.modal .tier.usable { color: #2f6bff; background: rgba(47,107,255,.1); }
+.modal .tier.review, .modal .tier.weak { color: #c67a00; background: rgba(198,122,0,.1); }
 .modal .tier.unverified { color: var(--ltxt-3); border-color: var(--lline-2); }
 
 footer { border-top: 1px solid var(--lline); padding: 28px clamp(18px,5vw,48px); text-align: center; font-size: 12.5px; color: var(--ltxt-3); background: var(--lbg); }
