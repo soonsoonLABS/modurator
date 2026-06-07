@@ -200,13 +200,17 @@ async function loadHome() {
 }
 
 async function loadReport() {
+  // 리포트 섹션이 없는 페이지(현 메인)에서는 건너뜀
+  if (!$("#reportMetrics") && !$("#reportStatus")) return;
   try {
     const r = await (await api("/api/report")).json();
     const s = r.summary || {};
     const total = s.total_solutions || 0;
-    $("#reportStatus").textContent = `평가 ${r.eval_summary?.average_score || "-"}점`;
-    $("#tVer").textContent = num(s.verified_homepage || 0);
-    $("#reportMetrics").innerHTML = [
+    const setText = (sel, v) => { const el = $(sel); if (el) el.textContent = v; };
+    const setHtml = (sel, v) => { const el = $(sel); if (el) el.innerHTML = v; };
+    setText("#reportStatus", `평가 ${r.eval_summary?.average_score || "-"}점`);
+    setText("#tVer", num(s.verified_homepage || 0));
+    setHtml("#reportMetrics", [
       ["등록 솔루션", num(total)],
       ["공급 기업", num(s.total_orgs)],
       ["홈페이지 확인", `${num(s.verified_homepage)} · ${pct(s.verified_homepage, total)}`],
@@ -226,7 +230,7 @@ async function loadReport() {
     );
 
     const weakest = (r.eval_summary?.weakest || []).slice(0, 3);
-    $("#reportEval").innerHTML = `
+    setHtml("#reportEval", `
       <div class="eval-score">
         <b>${esc(String(r.eval_summary?.average_score || "-"))}</b>
         <span>${esc(String(r.eval_summary?.scenario_count || 0))}개 자연어 시나리오</span>
@@ -241,15 +245,18 @@ async function loadReport() {
               </div>`
           )
           .join("")}
-      </div>`;
+      </div>`);
   } catch {
-    $("#reportStatus").textContent = "분석 불러오기 실패";
+    const el = $("#reportStatus");
+    if (el) el.textContent = "분석 불러오기 실패";
   }
 }
 
 function renderReportBars(selector, rows, total, unit) {
+  const host = $(selector);
+  if (!host) return;
   const max = Math.max(...rows.map((r) => Number(r.count || 0)), 1);
-  $(selector).innerHTML = rows
+  host.innerHTML = rows
     .map((r) => {
       const width = Math.max(6, Math.round((Number(r.count || 0) / max) * 100));
       const score = r.avg_score ? ` · ${r.avg_score}점` : "";
