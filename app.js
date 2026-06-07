@@ -299,10 +299,12 @@ function fillSai(node, data) {
         .join("") +
       `</div>`;
   }
-  node.innerHTML = `<span class="bot-dot">🤖</span><div class="bubble"><div class="body">${fmt(data.reply)}</div>${chips}${fbHtml(data)}</div>`;
+  node.innerHTML = `<span class="bot-dot">🤖</span><div class="bubble"><div class="body">${fmt(data.reply)}</div>${chips}<div class="inline-recs" data-recs></div>${fbHtml(data)}</div>`;
   node.querySelectorAll("[data-intent-query]").forEach((b) =>
     b.addEventListener("click", () => send(b.dataset.intentQuery))
   );
+  // 추천 카드를 답변 말풍선 안에 인라인으로 렌더
+  renderInlineRecs(node.querySelector("[data-recs]"), data.cards, data.groups);
   // 피드백 버튼 바인딩
   const fb = node.querySelector(".fb");
   if (fb) {
@@ -327,34 +329,27 @@ function fbHtml(data) {
     <button data-fb="down" aria-label="싫어요">👎</button>
   </div>`;
 }
-function renderRec(cards, groups = []) {
-  const list = $("#recList");
+
+// 대화 말풍선 안에 추천 카드 인라인 렌더 (챗 서비스 스타일)
+function renderInlineRecs(host, cards, groups) {
+  if (!host) return;
   if (groups && groups.length) {
-    $("#recHint").textContent = `${groups.length}개 분야`;
-    list.innerHTML = "";
+    host.innerHTML = "";
     groups.forEach((group) => {
-      const sec = document.createElement("section");
-      sec.className = "rec-group";
-      sec.innerHTML = `
-        <div class="rec-group-title">
-          <span>${esc(group.label || group.category || "추천 묶음")}</span>
-          <b>${(group.cards || []).length}개</b>
-        </div>
-        <div class="rec-group-list"></div>`;
-      const slot = sec.querySelector(".rec-group-list");
-      (group.cards || []).forEach((c, i) => slot.appendChild(solutionCard(c, { delay: i * 0.04 })));
-      list.appendChild(sec);
+      const t = document.createElement("div");
+      t.className = "inline-group-title";
+      t.textContent = `${group.label || group.category || "추천"} · ${(group.cards || []).length}개`;
+      host.appendChild(t);
+      (group.cards || []).forEach((c, i) => host.appendChild(solutionCard(c, { delay: i * 0.04 })));
     });
     return;
   }
-  if (!cards || !cards.length) {
-    $("#recHint").textContent = "이번 답변에는 카드가 없어요";
-    list.innerHTML = `<div class="rec-empty">이 질문에 맞는 솔루션 카드가 없어요.<br />조금 더 구체적으로 물어보면 찾아드릴게요.</div>`;
-    return;
+  if (cards && cards.length) {
+    host.innerHTML = `<div class="inline-recs-title">맞춤 추천 ${cards.length}개</div>`;
+    cards.forEach((c, i) => host.appendChild(solutionCard(c, { delay: i * 0.05 })));
+  } else {
+    host.remove();
   }
-  $("#recHint").textContent = `${cards.length}개 제안`;
-  list.innerHTML = "";
-  cards.forEach((c, i) => list.appendChild(solutionCard(c, { delay: i * 0.06 })));
 }
 
 async function send(text) {
@@ -376,7 +371,6 @@ async function send(text) {
     data.meta.original_query = text;
     fillSai(typing, data);
     history.push({ role: "assistant", content: data.reply });
-    renderRec(data.cards, data.groups);
   } catch {
     fillSai(typing, { reply: "연결에 문제가 생겼어요. 잠시 후 다시 시도해 주세요." });
   } finally {
@@ -643,8 +637,6 @@ $("#composer").addEventListener("submit", (e) => {
 $("#resetBtn").addEventListener("click", () => {
   history = [];
   $("#thread").innerHTML = "";
-  $("#recList").innerHTML = `<div class="rec-empty">왼쪽에 고민을 입력하면<br />여기에 맞춤 솔루션이 표시됩니다.</div>`;
-  $("#recHint").textContent = "대화에 따라 솔루션이 나타나요";
 });
 
 // 실제 상단바 높이를 CSS 변수로 반영 (채팅 레이아웃 높이 계산 정확도)
