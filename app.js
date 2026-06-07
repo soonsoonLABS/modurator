@@ -368,18 +368,34 @@ async function send(text) {
   history.push({ role: "user", content: text });
   const typing = addTyping();
   try {
-    const res = await api("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text, history: history.slice(0, -1), session_id: SESSION_ID }),
-    });
+    // 모바일 네트워크 대비: 45초 타임아웃 + 명시적 에러 분기
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 45000);
+    let res;
+    try {
+      res = await api("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, history: history.slice(0, -1), session_id: SESSION_ID }),
+        signal: ctrl.signal,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+    if (!res.ok) {
+      fillSai(typing, { reply: `서버 응답 오류 (${res.status})예요. 잠시 후 다시 시도해 주세요.` });
+      return;
+    }
     const data = await res.json();
     data.meta = data.meta || {};
     data.meta.original_query = text;
     fillSai(typing, data);
     history.push({ role: "assistant", content: data.reply });
-  } catch {
-    fillSai(typing, { reply: "연결에 문제가 생겼어요. 잠시 후 다시 시도해 주세요." });
+  } catch (e) {
+    const msg = (e && e.name === "AbortError")
+      ? "응답이 너무 오래 걸려 멈췄어요. 다시 시도해 주세요."
+      : "네트워크 연결을 확인해 주세요. (서버에 닿지 못했어요)";
+    fillSai(typing, { reply: msg });
   } finally {
     busy = false;
   }
