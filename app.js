@@ -1,4 +1,18 @@
 // ===== 모두레이터 프론트엔드 =====
+// [임시 진단] 전역 에러를 화면 상단에 표시 (원인 파악용)
+window.addEventListener("error", function (e) {
+  try {
+    let bar = document.getElementById("__errbar");
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.id = "__errbar";
+      bar.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:99999;background:#b00;color:#fff;font-size:12px;padding:8px;white-space:pre-wrap;font-family:monospace";
+      document.body.appendChild(bar);
+    }
+    bar.textContent = "JS ERROR: " + (e.message || "") + " @ " + (e.filename || "").split("/").pop() + ":" + e.lineno + ":" + e.colno;
+  } catch (_) {}
+});
+
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
@@ -219,7 +233,7 @@ async function loadReport() {
       ["요약 누락", num(s.missing_summary)],
     ]
       .map(([label, value]) => `<div class="report-metric"><b>${esc(value)}</b><span>${esc(label)}</span></div>`)
-      .join("");
+      .join(""));
 
     renderReportBars("#reportCategories", (r.categories || []).slice(0, 8), total, "개");
     renderReportBars(
