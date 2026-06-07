@@ -115,6 +115,8 @@ function go(view) {
   // 채팅 모드일 때만 페이지를 뷰포트에 고정 (입력창이 스크롤로 밀리지 않게)
   document.body.classList.toggle("chat-mode", view === "chat");
   window.scrollTo(0, 0);
+  // 채팅 모드에선 모바일 상단바가 1단으로 줄어드니 높이 재계산
+  if (typeof syncTopbarHeight === "function") setTimeout(syncTopbarHeight, 0);
   if (view === "browse" && !browseLoaded) loadBrowse();
 }
 $$("[data-go]").forEach((el) => el.addEventListener("click", () => go(el.dataset.go)));
